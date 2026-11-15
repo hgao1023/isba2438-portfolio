@@ -5,7 +5,9 @@ const en = {
     home: "Home",
     about: "About Me",
     projects: "Projects",
+    blogs: "Blogs",
     contact: "Contact",
+    contactApi: "Contact (API)",
     resume: "Resume",
   },
   home: {
@@ -145,11 +147,40 @@ const en = {
     send: "Send message",
     success: "Thanks! Your message has been sent.",
     errorBanner: "Your message was not sent. Please fix the errors below.",
+    serverError:
+      "Your message couldn't be sent — the server seems to be unreachable. Please try again later.",
     errors: {
       name: "Name can't be empty.",
       email: "Email doesn't look valid.",
       message: "Message can't be empty.",
     },
+  },
+  blog: {
+    title: "Write a blog post",
+    intro: "Write a new post and publish it to your blog.",
+    postTitle: "Title",
+    postContent: "Content",
+    publish: "Publish post",
+    success: "Your post has been published.",
+    errorBanner: "Your post was not saved. Please fix the errors below.",
+    errors: {
+      title: "Title can't be empty.",
+      content: "Content can't be empty.",
+    },
+  },
+  blogsPage: {
+    title: "Blog",
+    intro: "Occasional posts about what I'm building and learning.",
+    loading: "Loading posts…",
+    error: "Couldn't load the posts. Please try again later.",
+  },
+  blogPost: {
+    back: "← Back to blog",
+  },
+  blogNotFound: {
+    title: "Post not found",
+    body: "That blog post doesn't exist. Check the address, or browse the full list instead.",
+    back: "← Back to blog",
   },
 };
 
@@ -158,7 +189,9 @@ const zh: typeof en = {
     home: "首页",
     about: "关于我",
     projects: "项目",
+    blogs: "博客",
     contact: "联系",
+    contactApi: "联系（API）",
     resume: "简历",
   },
   home: {
@@ -288,11 +321,39 @@ const zh: typeof en = {
     send: "发送留言",
     success: "谢谢！你的留言已发送。",
     errorBanner: "留言未发送，请修正下方错误。",
+    serverError: "留言未能发送——服务器似乎无法访问，请稍后再试。",
     errors: {
       name: "姓名不能为空。",
       email: "邮箱格式看起来不正确。",
       message: "留言不能为空。",
     },
+  },
+  blog: {
+    title: "写博客文章",
+    intro: "撰写新文章并发布到你的博客。",
+    postTitle: "标题",
+    postContent: "内容",
+    publish: "发布文章",
+    success: "文章已发布。",
+    errorBanner: "文章未保存，请修正下方错误。",
+    errors: {
+      title: "标题不能为空。",
+      content: "内容不能为空。",
+    },
+  },
+  blogsPage: {
+    title: "博客",
+    intro: "记录我正在构建和学习的东西的一些文章。",
+    loading: "正在加载文章…",
+    error: "文章加载失败，请稍后再试。",
+  },
+  blogPost: {
+    back: "← 返回博客列表",
+  },
+  blogNotFound: {
+    title: "文章不存在",
+    body: "该博客文章不存在。请检查网址，或浏览完整文章列表。",
+    back: "← 返回博客列表",
   },
 };
 

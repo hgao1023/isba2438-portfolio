@@ -12,7 +12,9 @@ export default async function NavBar() {
     { href: "/", label: t.home },
     { href: "/about-me", label: t.about },
     { href: "/projects", label: t.projects },
+    { href: "/blogs", label: t.blogs },
     { href: "/contact-me-server-form", label: t.contact },
+    { href: "/contact-me", label: t.contactApi },
   ];
 
   return (
