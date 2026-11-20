@@ -73,3 +73,54 @@ export function validateContactForm(
 
   return errors;
 }
+
+export function parseContactInput(
+  obj: Record<string, unknown>,
+  lang: Language,
+): { ok: true; data: ContactFormData } | {
+  ok: false;
+  body: { status: "error"; message: string; errors: ContactFormErrors };
+} {
+  const t = content[lang].contact;
+
+  const rawName = obj.name;
+  const rawEmail = obj.email;
+  const rawMessage = obj.message;
+
+  const errors: ContactFormErrors = {};
+  if (
+    typeof rawName !== "string" ||
+    typeof rawEmail !== "string" ||
+    typeof rawMessage !== "string"
+  ) {
+    if (typeof rawName !== "string") {
+      errors.name = t.errors.nameString;
+    }
+    if (typeof rawEmail !== "string") {
+      errors.email = t.errors.emailString;
+    }
+    if (typeof rawMessage !== "string") {
+      errors.message = t.errors.messageString;
+    }
+    return {
+      ok: false,
+      body: { status: "error", message: t.errorBanner, errors },
+    };
+  }
+
+  const data = {
+    name: rawName.trim(),
+    email: rawEmail,
+    message: rawMessage.trim(),
+  };
+
+  const fieldErrors = validateContactForm(data, lang);
+  if (Object.keys(fieldErrors).length > 0) {
+    return {
+      ok: false,
+      body: { status: "error", message: t.errorBanner, errors: fieldErrors },
+    };
+  }
+
+  return { ok: true, data };
+}

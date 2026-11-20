@@ -1,6 +1,8 @@
+import { content } from "@/lib/content";
+
 export type Language = "en" | "zh";
 
-export type Localized = { en: string; zh: string };
+export type Localized = { en: string; zh?: string };
 
 export type Project = {
   slug: string;
@@ -13,87 +15,202 @@ export type Project = {
   outcome?: Localized;
 };
 
-const projects: Project[] = [
-  {
-    slug: "ai-competitive-intelligence",
-    title: {
-      en: "AI Competitive Intelligence Platform (SCU-Flex)",
-      zh: "AI 竞争情报平台（SCU-Flex）",
-    },
-    summary: {
-      en: "A RAG-powered competitive intelligence prototype unifying disclosures from 6 EMS companies and 5 cloud providers.",
-      zh: "一个基于 RAG 的竞争情报原型，整合 6 家 EMS 公司与 5 家云厂商的披露文件。",
-    },
-    dates: "Jan – Jun 2026",
-    tech: ["Python", "FastAPI", "Next.js", "SQLite", "ChromaDB"],
-    description: {
-      en: "A competitive intelligence prototype built in the SCU Business Intelligence Practicum. It unifies disclosures from 6 EMS companies and 5 cloud providers — 551 documents and 51,501 indexed passages — into one searchable platform, with RAG Q&A over SEC filings and earnings calls.",
-      zh: "在圣塔克拉拉大学商业智能实践课程中构建的竞争情报原型。它将 6 家 EMS 公司和 5 家云厂商的披露文件——551 份文档、51,501 条索引段落——整合到一个可检索的平台中，支持对 SEC 文件和业绩电话会进行 RAG 问答。",
-    },
-    contributions: [
-      {
-        en: "Led the design and delivery of the prototype using Python, FastAPI, and Next.js.",
-        zh: "使用 Python、FastAPI 和 Next.js 主导原型的设计与交付。",
-      },
-      {
-        en: "Built RAG Q&A over SEC filings and earnings calls using SQLite and ChromaDB.",
-        zh: "基于 SQLite 和 ChromaDB，构建面向 SEC 文件与业绩电话会的 RAG 问答。",
-      },
-      {
-        en: "Mapped financial terms and tagged fiscal periods across the corpus.",
-        zh: "对语料进行金融术语映射与财期标注。",
-      },
-      {
-        en: "Implemented hybrid retrieval with source citations and LLM routing with failover.",
-        zh: "实现混合检索（附来源引用）与带故障转移的 LLM 路由。",
-      },
-    ],
-    outcome: {
-      en: "The case was selected for AI for Supply Chain Finance, Chapter 11 (in preparation).",
-      zh: "该案例被收录进《AI for Supply Chain Finance》第 11 章（编写中）。",
-    },
-  },
-  {
-    slug: "bank-marketing-prediction",
-    title: {
-      en: "Bank Marketing Prediction and Outreach Analysis",
-      zh: "银行营销预测与外呼分析",
-    },
-    summary: {
-      en: "A machine learning workflow predicting term-deposit subscriptions from 45,211 bank records.",
-      zh: "一个从 45,211 条银行记录预测定期存款订阅的机器学习流程。",
-    },
-    dates: "Jan – Mar 2026",
-    tech: ["Python", "scikit-learn", "XGBoost"],
-    description: {
-      en: "A project from the Machine Learning with Python course: predicting which bank customers will subscribe to a term deposit from 45,211 records, and using the results to balance outreach coverage against contact costs.",
-      zh: "机器学习课程（Machine Learning with Python）项目：从 45,211 条银行客户记录预测客户是否会订阅定期存款，并利用结果在触达覆盖与联系成本之间取得平衡。",
-    },
-    contributions: [
-      {
-        en: "Led a 6-person team building a Python workflow with scikit-learn.",
-        zh: "带领 6 人团队使用 Python 和 scikit-learn 构建预测流程。",
-      },
-      {
-        en: "Designed the workflow framework, wrote the initial code, and coordinated testing and revisions.",
-        zh: "设计流程框架、编写初始代码，并统筹测试与修订。",
-      },
-      {
-        en: "Compared logistic regression, decision tree, random forest, and XGBoost with stratified cross-validation.",
-        zh: "使用分层交叉验证对比逻辑回归、决策树、随机森林与 XGBoost。",
-      },
-      {
-        en: "Excluded post-call variables to prevent leakage and used threshold analysis to balance coverage against contact costs.",
-        zh: "剔除通话后变量以防止数据泄漏，并用阈值分析平衡覆盖率与联系成本。",
-      },
-    ],
-  },
-];
-
-export function getAllProjects(): Project[] {
-  return projects;
+export function pickLocalized(value: Localized, lang: Language): string {
+  return value[lang] ?? value.en;
 }
 
-export function getProjectBySlug(slug: string): Project | undefined {
-  return projects.find((project) => project.slug === slug);
+export type ProjectField =
+  | "title"
+  | "summary"
+  | "dates"
+  | "tech"
+  | "description"
+  | "contributions"
+  | "outcome";
+
+export type ProjectInputErrors = Partial<Record<ProjectField, string>>;
+
+export type ProjectInput = {
+  title: Localized;
+  summary: Localized;
+  dates: string;
+  tech: string[];
+  description: Localized;
+  contributions: Localized[];
+  outcome: Localized | null;
+};
+
+function parseLocalized(
+  value: unknown,
+  existing: Localized | undefined,
+  messages: {
+    label: string;
+    empty: string;
+    needsEn: string;
+    zhString: string;
+    mustBeText: string;
+  },
+  optional: boolean,
+): { value?: Localized; error?: string } {
+  if (value === undefined) {
+    if (existing === undefined && !optional) {
+      return { error: messages.label + messages.empty };
+    }
+    return { value: existing };
+  }
+  if (typeof value === "string") {
+    const en = value.trim();
+    if (en.length === 0) {
+      if (optional) {
+        return { value: undefined };
+      }
+      return { error: messages.label + messages.empty };
+    }
+    const result: Localized = { en };
+    if (existing?.zh) {
+      result.zh = existing.zh;
+    }
+    return { value: result };
+  }
+  if (typeof value === "object" && value !== null && !Array.isArray(value)) {
+    const obj = value as { en?: unknown; zh?: unknown };
+    if (typeof obj.en !== "string" || obj.en.trim().length === 0) {
+      return { error: messages.label + messages.needsEn };
+    }
+    const result: Localized = { en: obj.en.trim() };
+    if (obj.zh !== undefined) {
+      if (typeof obj.zh !== "string") {
+        return { error: messages.label + messages.zhString };
+      }
+      const zh = obj.zh.trim();
+      if (zh.length > 0) {
+        result.zh = zh;
+      }
+    } else if (existing?.zh) {
+      result.zh = existing.zh;
+    }
+    return { value: result };
+  }
+  return { error: messages.label + messages.mustBeText };
+}
+
+export function parseProjectInput(
+  obj: Record<string, unknown>,
+  lang: Language,
+  existing?: Project,
+): { ok: true; data: ProjectInput } | { ok: false; errors: ProjectInputErrors } {
+  const e = content[lang].projectAdmin.errors;
+  const msg = (label: string) => ({
+    label,
+    empty: e.phrases.empty,
+    needsEn: e.phrases.needsEn,
+    zhString: e.phrases.zhString,
+    mustBeText: e.phrases.mustBeText,
+  });
+
+  const errors: ProjectInputErrors = {};
+
+  const title = parseLocalized(obj.title, existing?.title, msg(e.labels.title), false);
+  if (title.error) errors.title = title.error;
+  const summary = parseLocalized(obj.summary, existing?.summary, msg(e.labels.summary), false);
+  if (summary.error) errors.summary = summary.error;
+  const description = parseLocalized(obj.description, existing?.description, msg(e.labels.description), false);
+  if (description.error) errors.description = description.error;
+
+  let dates: string | undefined;
+  if (obj.dates === undefined) {
+    dates = existing?.dates;
+  } else if (typeof obj.dates === "string" && obj.dates.trim().length > 0) {
+    dates = obj.dates.trim();
+  } else {
+    errors.dates = e.dates;
+  }
+
+  let tech: string[] | undefined;
+  if (obj.tech === undefined) {
+    tech = existing?.tech;
+  } else if (
+    Array.isArray(obj.tech) &&
+    obj.tech.length > 0 &&
+    obj.tech.every((item) => typeof item === "string" && item.trim().length > 0)
+  ) {
+    tech = obj.tech.map((item) => (item as string).trim());
+  } else {
+    errors.tech = e.tech;
+  }
+
+  let contributions: Localized[] | undefined;
+  if (Array.isArray(obj.contributions)) {
+    contributions = [];
+    for (let index = 0; index < obj.contributions.length; index += 1) {
+      const raw = obj.contributions[index];
+      let match: Localized | undefined;
+      const rawEn =
+        typeof raw === "string"
+          ? raw.trim()
+          : typeof raw === "object" &&
+              raw !== null &&
+              !Array.isArray(raw) &&
+              typeof (raw as { en?: unknown }).en === "string"
+            ? ((raw as { en: string }).en).trim()
+            : null;
+      if (rawEn !== null && rawEn.length > 0) {
+        match = existing?.contributions.find(
+          (contribution) => contribution.en === rawEn,
+        );
+      }
+      const parsed = parseLocalized(
+        raw,
+        match,
+        msg(`${e.labels.contribution} ${index + 1}`),
+        false,
+      );
+      if (parsed.error || !parsed.value) {
+        errors.contributions =
+          parsed.error ??
+          `${e.labels.contribution} ${index + 1}${e.phrases.empty}`;
+        break;
+      }
+      contributions.push(parsed.value);
+    }
+    if (contributions.length === 0 && !errors.contributions) {
+      errors.contributions = e.contributionsEmpty;
+    }
+  } else if (obj.contributions === undefined) {
+    contributions = existing?.contributions;
+  } else {
+    errors.contributions = e.contributionsList;
+  }
+
+  let outcome: Localized | null;
+  if (obj.outcome === undefined) {
+    outcome = existing?.outcome ?? null;
+  } else if (obj.outcome === null) {
+    outcome = null;
+  } else {
+    const parsed = parseLocalized(obj.outcome, existing?.outcome, msg(e.labels.outcome), true);
+    if (parsed.error) {
+      errors.outcome = parsed.error;
+      outcome = null;
+    } else {
+      outcome = parsed.value ?? null;
+    }
+  }
+
+  if (Object.keys(errors).length > 0) {
+    return { ok: false, errors };
+  }
+
+  return {
+    ok: true,
+    data: {
+      title: title.value as Localized,
+      summary: summary.value as Localized,
+      dates: dates as string,
+      tech: tech as string[],
+      description: description.value as Localized,
+      contributions: contributions as Localized[],
+      outcome,
+    },
+  };
 }

@@ -10,7 +10,7 @@ export default function BlogList({
   labels,
 }: {
   lang: Language;
-  labels: { loading: string; error: string };
+  labels: { loading: string; error: string; empty: string };
 }) {
   const [posts, setPosts] = useState<BlogPost[] | null>(null);
   const [failed, setFailed] = useState(false);
@@ -47,6 +47,14 @@ export default function BlogList({
     return (
       <p className="mt-6 text-sm text-zinc-500 dark:text-[#86868b]">
         {labels.loading}
+      </p>
+    );
+  }
+
+  if (posts.length === 0) {
+    return (
+      <p className="mt-6 text-sm text-zinc-500 dark:text-[#86868b]">
+        {labels.empty}
       </p>
     );
   }

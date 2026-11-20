@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import type { BlogPost } from "@/lib/blog-posts";
 import { formatPostDate } from "@/lib/blog-format";
 import type { Language } from "@/lib/content";
@@ -6,9 +7,11 @@ import type { Language } from "@/lib/content";
 export default function BlogCard({
   post,
   lang,
+  children,
 }: {
   post: BlogPost;
   lang: Language;
+  children?: ReactNode;
 }) {
   const excerpt =
     post.content.length > 140
@@ -28,6 +31,7 @@ export default function BlogCard({
       <p className="mt-2 text-sm leading-6 text-zinc-600 dark:text-[#a1a1a6]">
         {excerpt}
       </p>
+      {children}
     </div>
   );
 }

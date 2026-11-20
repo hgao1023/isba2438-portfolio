@@ -1,4 +1,4 @@
-import { dataFilePath, readJsonFile, writeJsonFile } from "@/lib/json-file";
+import { content, type Language } from "@/lib/content";
 
 export type ScheduleSlot = {
   id: string;
@@ -33,49 +33,63 @@ function isValidTime(value: string): boolean {
 
 export function parseScheduleInput(
   obj: Record<string, unknown>,
+  lang: Language,
 ): { ok: true; data: ScheduleSlotInput } | { ok: false; errors: ScheduleSlotErrors } {
+  const messages = content[lang].scheduleAdmin.errors;
   const errors: ScheduleSlotErrors = {};
 
-  for (const field of ["date", "startTime", "endTime", "title"] as const) {
-    if (typeof obj[field] !== "string") {
-      errors[field] = `${field} must be a string.`;
-    }
+  const rawDate = obj.date;
+  const rawStart = obj.startTime;
+  const rawEnd = obj.endTime;
+  const rawTitle = obj.title;
+
+  if (typeof rawDate !== "string") {
+    errors.date = messages.dateString;
+  }
+  if (typeof rawStart !== "string") {
+    errors.startTime = messages.startString;
+  }
+  if (typeof rawEnd !== "string") {
+    errors.endTime = messages.endString;
+  }
+  if (typeof rawTitle !== "string") {
+    errors.title = messages.slotString;
   }
   if (Object.keys(errors).length > 0) {
     return { ok: false, errors };
   }
 
   const data = {
-    date: (obj.date as string).trim(),
-    startTime: (obj.startTime as string).trim(),
-    endTime: (obj.endTime as string).trim(),
-    title: (obj.title as string).trim(),
+    date: (rawDate as string).trim(),
+    startTime: (rawStart as string).trim(),
+    endTime: (rawEnd as string).trim(),
+    title: (rawTitle as string).trim(),
   };
 
   if (data.date === "") {
-    errors.date = "date can't be empty.";
+    errors.date = messages.dateEmpty;
   } else if (!isValidDate(data.date)) {
-    errors.date = "date must be a real date in YYYY-MM-DD format.";
+    errors.date = messages.dateFormat;
   }
 
   if (data.startTime === "") {
-    errors.startTime = "startTime can't be empty.";
+    errors.startTime = messages.startEmpty;
   } else if (!isValidTime(data.startTime)) {
-    errors.startTime = "startTime must be a time in HH:MM format.";
+    errors.startTime = messages.startFormat;
   }
 
   if (data.endTime === "") {
-    errors.endTime = "endTime can't be empty.";
+    errors.endTime = messages.endEmpty;
   } else if (!isValidTime(data.endTime)) {
-    errors.endTime = "endTime must be a time in HH:MM format.";
+    errors.endTime = messages.endFormat;
   }
 
   if (data.title === "") {
-    errors.title = "title can't be empty.";
+    errors.title = messages.slotEmpty;
   }
 
   if (Object.keys(errors).length === 0 && data.endTime <= data.startTime) {
-    errors.endTime = "endTime must be after startTime.";
+    errors.endTime = messages.endOrder;
   }
 
   if (Object.keys(errors).length > 0) {
@@ -85,58 +99,9 @@ export function parseScheduleInput(
   return { ok: true, data };
 }
 
-export async function getScheduleSlots(): Promise<ScheduleSlot[]> {
-  return readJsonFile<ScheduleSlot[]>(dataFilePath("schedule.json"), []);
-}
-
-export async function getScheduleSlot(
-  id: string,
-): Promise<ScheduleSlot | undefined> {
-  const slots = await getScheduleSlots();
-  return slots.find((slot) => slot.id === id);
-}
-
-export async function addScheduleSlot(
-  data: ScheduleSlotInput,
-): Promise<ScheduleSlot> {
-  const dataFile = dataFilePath("schedule.json");
-  const slots = await getScheduleSlots();
-
-  const slot: ScheduleSlot = { id: crypto.randomUUID(), ...data };
-  slots.push(slot);
-
-  await writeJsonFile(dataFile, slots);
-  return slot;
-}
-
-export async function updateScheduleSlot(
-  id: string,
-  data: ScheduleSlotInput,
-): Promise<ScheduleSlot | null> {
-  const dataFile = dataFilePath("schedule.json");
-  const slots = await getScheduleSlots();
-
-  const index = slots.findIndex((slot) => slot.id === id);
-  if (index === -1) {
-    return null;
-  }
-
-  const updated: ScheduleSlot = { id, ...data };
-  slots[index] = updated;
-
-  await writeJsonFile(dataFile, slots);
-  return updated;
-}
-
-export async function deleteScheduleSlot(id: string): Promise<boolean> {
-  const dataFile = dataFilePath("schedule.json");
-  const slots = await getScheduleSlots();
-
-  const next = slots.filter((slot) => slot.id !== id);
-  if (next.length === slots.length) {
-    return false;
-  }
-
-  await writeJsonFile(dataFile, next);
-  return true;
+export function sortScheduleSlots(slots: ScheduleSlot[]): ScheduleSlot[] {
+  return [...slots].sort(
+    (a, b) =>
+      a.date.localeCompare(b.date) || a.startTime.localeCompare(b.startTime),
+  );
 }

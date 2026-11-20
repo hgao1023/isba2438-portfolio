@@ -1,6 +1,6 @@
 "use server";
 
-import { saveContactSubmission } from "@/lib/contact-submissions";
+import { saveContactSubmission } from "@/lib/contact-store";
 import {
   validateContactForm,
   type ContactFormState,

@@ -1,8 +1,16 @@
-import { saveContactSubmission } from "@/lib/contact-submissions";
+import {
+  getContactSubmissions,
+  saveContactSubmission,
+} from "@/lib/contact-store";
 import { logApiResponse } from "@/lib/api-log";
-import { validateContactForm } from "@/lib/contact-validation";
+import { parseContactInput } from "@/lib/contact-validation";
 import { getLanguage } from "@/lib/language";
 import { content } from "@/lib/content";
+
+export async function GET(request: Request) {
+  const submissions = await getContactSubmissions();
+  return logApiResponse(request, Response.json(submissions));
+}
 
 export async function POST(request: Request) {
   const lang = await getLanguage();
@@ -25,28 +33,18 @@ export async function POST(request: Request) {
     );
   }
 
-  const obj = body as Record<string, unknown>;
-  const data = {
-    name: String(obj.name ?? "").trim(),
-    email: String(obj.email ?? ""),
-    message: String(obj.message ?? "").trim(),
-  };
-
-  const errors = validateContactForm(data, lang);
-  if (Object.keys(errors).length > 0) {
+  const parsed = parseContactInput(body as Record<string, unknown>, lang);
+  if (!parsed.ok) {
     return logApiResponse(
       request,
-      Response.json(
-        { status: "error", message: t.errorBanner, errors },
-        { status: 400 },
-      ),
+      Response.json(parsed.body, { status: 400 }),
     );
   }
 
   await saveContactSubmission({
-    name: data.name,
-    email: data.email,
-    message: data.message,
+    name: parsed.data.name,
+    email: parsed.data.email,
+    message: parsed.data.message,
     sentAt: new Date().toISOString(),
   });
 

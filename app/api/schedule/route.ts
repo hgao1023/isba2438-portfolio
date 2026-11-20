@@ -1,5 +1,8 @@
-import { addScheduleSlot, getScheduleSlots, parseScheduleInput } from "@/lib/schedule";
+import { addScheduleSlot, getScheduleSlots } from "@/lib/schedule-store";
+import { parseScheduleInput } from "@/lib/schedule";
 import { logApiResponse } from "@/lib/api-log";
+import { getLanguage } from "@/lib/language";
+import { content } from "@/lib/content";
 
 export async function GET(request: Request) {
   const slots = await getScheduleSlots();
@@ -7,6 +10,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const lang = await getLanguage();
   let body: unknown;
   try {
     body = await request.json();
@@ -24,12 +28,15 @@ export async function POST(request: Request) {
     );
   }
 
-  const parsed = parseScheduleInput(body as Record<string, unknown>);
+  const parsed = parseScheduleInput(body as Record<string, unknown>, lang);
   if (!parsed.ok) {
     return logApiResponse(
       request,
       Response.json(
-        { error: "Invalid schedule slot.", errors: parsed.errors },
+        {
+          error: content[lang].scheduleAdmin.errors.banner,
+          errors: parsed.errors,
+        },
         { status: 400 },
       ),
     );

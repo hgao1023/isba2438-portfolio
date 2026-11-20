@@ -16,19 +16,23 @@ export default async function NavBar() {
     { href: "/contact-me-server-form", label: t.contact },
     { href: "/contact-me", label: t.contactApi },
     { href: "/questions", label: t.questions },
+    { href: "/schedule", label: t.schedule },
   ];
 
   return (
     <header className="border-b border-zinc-200 bg-white dark:border-[#38383a] dark:bg-[#1d1d1f]">
-      <nav className="mx-auto flex max-w-4xl items-center justify-between px-4 py-4">
-        <Link href="/" className="text-lg font-semibold">
+      <nav className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-4">
+        <Link href="/" className="whitespace-nowrap text-lg font-semibold">
           Heliang Gao (Tony)
         </Link>
-        <div className="flex items-center gap-4">
-          <ul className="flex items-center gap-4 text-sm">
+        <div className="flex items-center gap-3">
+          <ul className="flex flex-nowrap items-center gap-3 text-sm">
             {links.map((link) => (
               <li key={link.href}>
-                <Link href={link.href} className="hover:underline">
+                <Link
+                  href={link.href}
+                  className="whitespace-nowrap hover:underline"
+                >
                   {link.label}
                 </Link>
               </li>
@@ -38,7 +42,7 @@ export default async function NavBar() {
                 href="/Resume.pdf"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:underline"
+                className="whitespace-nowrap hover:underline"
               >
                 {t.resume}
               </a>

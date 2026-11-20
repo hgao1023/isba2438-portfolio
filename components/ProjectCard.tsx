@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { Project } from "@/lib/projects";
+import { pickLocalized, type Project } from "@/lib/projects";
 import type { Language } from "@/lib/content";
 
 export default function ProjectCard({
@@ -13,14 +13,14 @@ export default function ProjectCard({
     <div className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-[#38383a] dark:bg-[#2c2c2e]">
       <h3 className="font-semibold">
         <Link href={`/projects/${project.slug}`} className="hover:underline">
-          {project.title[lang]}
+          {pickLocalized(project.title, lang)}
         </Link>
       </h3>
       <p className="mt-1 text-sm text-zinc-500 dark:text-[#86868b]">
         {project.dates}
       </p>
       <p className="mt-2 text-sm leading-6 text-zinc-600 dark:text-[#a1a1a6]">
-        {project.summary[lang]}
+        {pickLocalized(project.summary, lang)}
       </p>
       <ul className="mt-3 flex flex-wrap gap-2">
         {project.tech.map((item) => (

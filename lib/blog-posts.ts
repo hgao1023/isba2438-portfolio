@@ -1,4 +1,4 @@
-import { dataFilePath, readJsonFile, writeJsonFile } from "@/lib/json-file";
+import { content, type Language } from "@/lib/content";
 
 export type BlogPost = {
   slug: string;
@@ -7,41 +7,52 @@ export type BlogPost = {
   createdAt: string;
 };
 
-function slugify(title: string): string {
-  const slug = title
-    .toLowerCase()
-    .replace(/[^\p{L}\p{N}]+/gu, "-")
-    .replace(/^-+|-+$/g, "");
-  return slug || "post";
-}
+export type BlogInputErrors = { title?: string; content?: string };
 
-export async function getBlogPosts(): Promise<BlogPost[]> {
-  return readJsonFile<BlogPost[]>(dataFilePath("blogs.json"), []);
-}
+export function parseBlogInput(
+  obj: Record<string, unknown>,
+  lang: Language,
+): { ok: true; data: { title: string; content: string } } | {
+  ok: false;
+  body: { status: "error"; message: string; errors: BlogInputErrors };
+} {
+  const t = content[lang].blog;
 
-export async function addBlogPost(
-  title: string,
-  content: string,
-): Promise<BlogPost> {
-  const dataFile = dataFilePath("blogs.json");
-  const posts = await getBlogPosts();
+  const rawTitle = obj.title;
+  const rawContent = obj.content;
 
-  const baseSlug = slugify(title);
-  let slug = baseSlug;
-  let counter = 2;
-  while (posts.some((post) => post.slug === slug)) {
-    slug = `${baseSlug}-${counter}`;
-    counter += 1;
+  const errors: BlogInputErrors = {};
+  if (typeof rawTitle !== "string" || typeof rawContent !== "string") {
+    if (typeof rawTitle !== "string") {
+      errors.title = t.errors.titleString;
+    }
+    if (typeof rawContent !== "string") {
+      errors.content = t.errors.contentString;
+    }
+    return {
+      ok: false,
+      body: { status: "error", message: t.errorBanner, errors },
+    };
   }
 
-  const post: BlogPost = {
-    slug,
-    title,
-    content,
-    createdAt: new Date().toISOString(),
+  const data = {
+    title: rawTitle.trim(),
+    content: rawContent.trim(),
   };
-  posts.push(post);
 
-  await writeJsonFile(dataFile, posts);
-  return post;
+  if (data.title.length === 0) {
+    errors.title = t.errors.title;
+  }
+  if (data.content.length === 0) {
+    errors.content = t.errors.content;
+  }
+
+  if (Object.keys(errors).length > 0) {
+    return {
+      ok: false,
+      body: { status: "error", message: t.errorBanner, errors },
+    };
+  }
+
+  return { ok: true, data };
 }

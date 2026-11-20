@@ -1,12 +1,12 @@
 import ProjectCard from "@/components/ProjectCard";
-import { getAllProjects } from "@/lib/projects";
+import { getAllProjects } from "@/lib/project-store";
 import { getLanguage } from "@/lib/language";
 import { content } from "@/lib/content";
 
 export default async function Projects() {
   const lang = await getLanguage();
   const t = content[lang].projectsPage;
-  const projects = getAllProjects();
+  const projects = await getAllProjects();
 
   return (
     <section>

@@ -1,4 +1,5 @@
-import { addBlogPost, getBlogPosts } from "@/lib/blog-posts";
+import { addBlogPost, getBlogPosts } from "@/lib/blog-store";
+import { parseBlogInput } from "@/lib/blog-posts";
 import { logApiResponse } from "@/lib/api-log";
 import { getLanguage } from "@/lib/language";
 import { content } from "@/lib/content";
@@ -29,31 +30,15 @@ export async function POST(request: Request) {
     );
   }
 
-  const obj = body as Record<string, unknown>;
-  const data = {
-    title: String(obj.title ?? "").trim(),
-    content: String(obj.content ?? "").trim(),
-  };
-
-  const errors: { title?: string; content?: string } = {};
-  if (data.title.length === 0) {
-    errors.title = t.errors.title;
-  }
-  if (data.content.length === 0) {
-    errors.content = t.errors.content;
-  }
-
-  if (Object.keys(errors).length > 0) {
+  const parsed = parseBlogInput(body as Record<string, unknown>, lang);
+  if (!parsed.ok) {
     return logApiResponse(
       request,
-      Response.json(
-        { status: "error", message: t.errorBanner, errors },
-        { status: 400 },
-      ),
+      Response.json(parsed.body, { status: 400 }),
     );
   }
 
-  const post = await addBlogPost(data.title, data.content);
+  const post = await addBlogPost(parsed.data.title, parsed.data.content);
   return logApiResponse(
     request,
     Response.json({ status: "success", message: t.success, post }, { status: 201 }),

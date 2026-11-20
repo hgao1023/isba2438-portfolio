@@ -1,10 +1,12 @@
 import {
   deleteScheduleSlot,
   getScheduleSlot,
-  parseScheduleInput,
   updateScheduleSlot,
-} from "@/lib/schedule";
+} from "@/lib/schedule-store";
+import { parseScheduleInput } from "@/lib/schedule";
 import { logApiResponse } from "@/lib/api-log";
+import { getLanguage } from "@/lib/language";
+import { content } from "@/lib/content";
 
 type Context = { params: Promise<{ id: string }> };
 
@@ -24,6 +26,7 @@ export async function GET(request: Request, { params }: Context) {
 
 export async function PUT(request: Request, { params }: Context) {
   const { id } = await params;
+  const lang = await getLanguage();
 
   let body: unknown;
   try {
@@ -42,12 +45,15 @@ export async function PUT(request: Request, { params }: Context) {
     );
   }
 
-  const parsed = parseScheduleInput(body as Record<string, unknown>);
+  const parsed = parseScheduleInput(body as Record<string, unknown>, lang);
   if (!parsed.ok) {
     return logApiResponse(
       request,
       Response.json(
-        { error: "Invalid schedule slot.", errors: parsed.errors },
+        {
+          error: content[lang].scheduleAdmin.errors.banner,
+          errors: parsed.errors,
+        },
         { status: 400 },
       ),
     );

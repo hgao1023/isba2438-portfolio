@@ -1,12 +1,13 @@
 import Link from "next/link";
-import { getAllProjects } from "@/lib/projects";
+import { getAllProjects } from "@/lib/project-store";
+import { pickLocalized } from "@/lib/projects";
 import { getLanguage } from "@/lib/language";
 import { content } from "@/lib/content";
 
 export default async function Home() {
   const lang = await getLanguage();
   const t = content[lang].home;
-  const projects = getAllProjects();
+  const projects = await getAllProjects();
 
   return (
     <section className="flex flex-col gap-12">
@@ -50,11 +51,11 @@ export default async function Home() {
                   href={`/projects/${project.slug}`}
                   className="hover:underline"
                 >
-                  {project.title[lang]}
+                  {pickLocalized(project.title, lang)}
                 </Link>
               </h3>
               <p className="mt-2 text-sm leading-6 text-zinc-600 dark:text-[#a1a1a6]">
-                {project.summary[lang]}
+                {pickLocalized(project.summary, lang)}
               </p>
             </div>
           ))}
