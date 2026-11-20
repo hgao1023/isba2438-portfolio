@@ -8,6 +8,7 @@ const en = {
     blogs: "Blogs",
     contact: "Contact",
     contactApi: "Contact (API)",
+    questions: "My Questions",
     resume: "Resume",
   },
   home: {
@@ -182,6 +183,32 @@ const en = {
     body: "That blog post doesn't exist. Check the address, or browse the full list instead.",
     back: "← Back to blog",
   },
+  questions: {
+    title: "My Questions",
+    intro:
+      "Jot down questions you'd like to ask me — about my projects, experience, internships, or anything else.",
+    privacyNote:
+      "These questions only stay in this browser — I can't see them.",
+    question: "Question",
+    category: "Category",
+    categories: {
+      project: "Project",
+      experience: "Experience",
+      internship: "Internship",
+      other: "Other",
+    },
+    add: "Add question",
+    edit: "Edit",
+    save: "Save",
+    cancel: "Cancel",
+    delete: "Delete",
+    emptyState: "No questions yet",
+    resetNotice: "Some saved questions couldn't be read, so they were reset.",
+    errors: {
+      empty: "Question can't be empty.",
+      tooLong: "Question can't be longer than 300 characters.",
+    },
+  },
 };
 
 const zh: typeof en = {
@@ -192,6 +219,7 @@ const zh: typeof en = {
     blogs: "博客",
     contact: "联系",
     contactApi: "联系（API）",
+    questions: "My Questions",
     resume: "简历",
   },
   home: {
@@ -354,6 +382,32 @@ const zh: typeof en = {
     title: "文章不存在",
     body: "该博客文章不存在。请检查网址，或浏览完整文章列表。",
     back: "← 返回博客列表",
+  },
+  questions: {
+    title: "My Questions",
+    intro:
+      "Jot down questions you'd like to ask me — about my projects, experience, internships, or anything else.",
+    privacyNote:
+      "These questions only stay in this browser — I can't see them.",
+    question: "Question",
+    category: "Category",
+    categories: {
+      project: "Project",
+      experience: "Experience",
+      internship: "Internship",
+      other: "Other",
+    },
+    add: "Add question",
+    edit: "Edit",
+    save: "Save",
+    cancel: "Cancel",
+    delete: "Delete",
+    emptyState: "No questions yet",
+    resetNotice: "Some saved questions couldn't be read, so they were reset.",
+    errors: {
+      empty: "Question can't be empty.",
+      tooLong: "Question can't be longer than 300 characters.",
+    },
   },
 };
 

@@ -15,6 +15,7 @@ export default async function NavBar() {
     { href: "/blogs", label: t.blogs },
     { href: "/contact-me-server-form", label: t.contact },
     { href: "/contact-me", label: t.contactApi },
+    { href: "/questions", label: t.questions },
   ];
 
   return (
