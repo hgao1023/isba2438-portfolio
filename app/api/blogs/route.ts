@@ -1,10 +1,11 @@
 import { addBlogPost, getBlogPosts } from "@/lib/blog-posts";
+import { logApiResponse } from "@/lib/api-log";
 import { getLanguage } from "@/lib/language";
 import { content } from "@/lib/content";
 
-export async function GET() {
+export async function GET(request: Request) {
   const posts = await getBlogPosts();
-  return Response.json(posts);
+  return logApiResponse(request, Response.json(posts));
 }
 
 export async function POST(request: Request) {
@@ -15,16 +16,16 @@ export async function POST(request: Request) {
   try {
     body = await request.json();
   } catch {
-    return Response.json(
-      { error: "Request body must be valid JSON." },
-      { status: 400 },
+    return logApiResponse(
+      request,
+      Response.json({ error: "Request body must be valid JSON." }, { status: 400 }),
     );
   }
 
   if (typeof body !== "object" || body === null || Array.isArray(body)) {
-    return Response.json(
-      { error: "Request body must be a JSON object." },
-      { status: 400 },
+    return logApiResponse(
+      request,
+      Response.json({ error: "Request body must be a JSON object." }, { status: 400 }),
     );
   }
 
@@ -43,15 +44,18 @@ export async function POST(request: Request) {
   }
 
   if (Object.keys(errors).length > 0) {
-    return Response.json(
-      { status: "error", message: t.errorBanner, errors },
-      { status: 400 },
+    return logApiResponse(
+      request,
+      Response.json(
+        { status: "error", message: t.errorBanner, errors },
+        { status: 400 },
+      ),
     );
   }
 
   const post = await addBlogPost(data.title, data.content);
-  return Response.json(
-    { status: "success", message: t.success, post },
-    { status: 201 },
+  return logApiResponse(
+    request,
+    Response.json({ status: "success", message: t.success, post }, { status: 201 }),
   );
 }

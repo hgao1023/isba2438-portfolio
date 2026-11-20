@@ -1,8 +1,4 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import path from "node:path";
-
-const dataDir = path.join(process.cwd(), "data");
-const dataFile = path.join(dataDir, "blogs.json");
+import { dataFilePath, readJsonFile, writeJsonFile } from "@/lib/json-file";
 
 export type BlogPost = {
   slug: string;
@@ -20,18 +16,14 @@ function slugify(title: string): string {
 }
 
 export async function getBlogPosts(): Promise<BlogPost[]> {
-  try {
-    return JSON.parse(await readFile(dataFile, "utf8"));
-  } catch {
-    return [];
-  }
+  return readJsonFile<BlogPost[]>(dataFilePath("blogs.json"), []);
 }
 
 export async function addBlogPost(
   title: string,
   content: string,
 ): Promise<BlogPost> {
-  await mkdir(dataDir, { recursive: true });
+  const dataFile = dataFilePath("blogs.json");
   const posts = await getBlogPosts();
 
   const baseSlug = slugify(title);
@@ -50,6 +42,6 @@ export async function addBlogPost(
   };
   posts.push(post);
 
-  await writeFile(dataFile, JSON.stringify(posts, null, 2), "utf8");
+  await writeJsonFile(dataFile, posts);
   return post;
 }

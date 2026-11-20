@@ -1,8 +1,4 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import path from "node:path";
-
-const dataDir = path.join(process.cwd(), "data");
-const dataFile = path.join(dataDir, "contact-submissions.json");
+import { dataFilePath, readJsonFile, writeJsonFile } from "@/lib/json-file";
 
 export type ContactSubmission = {
   name: string;
@@ -11,19 +7,20 @@ export type ContactSubmission = {
   sentAt: string;
 };
 
+export async function getContactSubmissions(): Promise<ContactSubmission[]> {
+  return readJsonFile<ContactSubmission[]>(
+    dataFilePath("contact-submissions.json"),
+    [],
+  );
+}
+
 export async function saveContactSubmission(
   submission: ContactSubmission,
 ): Promise<void> {
-  await mkdir(dataDir, { recursive: true });
-
-  let submissions: ContactSubmission[] = [];
-  try {
-    submissions = JSON.parse(await readFile(dataFile, "utf8"));
-  } catch {
-    submissions = [];
-  }
+  const dataFile = dataFilePath("contact-submissions.json");
+  const submissions = await getContactSubmissions();
 
   submissions.push(submission);
 
-  await writeFile(dataFile, JSON.stringify(submissions, null, 2), "utf8");
+  await writeJsonFile(dataFile, submissions);
 }
